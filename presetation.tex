@@ -1,0 +1,533 @@
+\documentclass[10pt, aspectratio=169]{beamer}
+
+% -------- 主题与风格设置 --------
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{} % 隐藏导航栏
+\setbeamertemplate{caption}[numbered]     % 显示图片编号
+
+% 调整列表符号的样式（可选，让bullet更现代）
+\setbeamertemplate{itemize items}[circle]
+
+% -------- 宏包 --------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage{biblatex}
+
+\addbibresource{references.bib} % 引用文献文件
+
+% -------- 论文信息配置 --------
+\title[Geostatistical Refinement of GIS]{Geostatistical Refinement of GIS Classification Results}
+\subtitle{Evaluating and Correcting Spatial Outliers via Kriging-based Hypothesis Testing}
+\author[Weiqian Xu]{Author: Weiqian Xu \\ \vspace{0.2cm} \footnotesize Supervisor: Prof. N. D. Pankratova}
+\institute[SPbU]{Saint Petersburg State University \\ \textit{Applied Mathematics}}
+\date[2026]{Master's Thesis Defense \\ 2026}
+
+\begin{document}
+
+% 0. 标题页
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% 0.1 目录
+\begin{frame}{Presentation Outline}
+    \tableofcontents[hideallsubsections]
+\end{frame}
+
+% ==========================================
+% 第一部分：研究背景与问题
+% ==========================================
+\section{Introduction \& Background}
+
+\begin{frame}{Background: Pixel-based Classification in GIS}
+    \begin{alertblock}{Tobler's 1st Law}
+            "Everything is related to everything else, but near things are more related than distant things." \cite{tobler1970computer}
+        \end{alertblock}
+   
+        % 现状与痛点
+        \textbf{Context: Remote Sensing (RS)}
+        \begin{itemize}
+            \item High-resolution data demands automated, pixel-wise Land Use/Land Cover (LULC) classification.
+        \end{itemize}
+        
+        \vspace{0.4cm}
+        \textbf{The Flaw in EM:} EM Clustering treat every single pixel as an independent sample. this directly violates Tobler's First Law of Geography. Natural landscapes are continuous and spatially autocorrelated.
+
+\end{frame}
+
+%Currently, pixel-wise classification algorithms like EM or Random Forests are widely used. However, they share a critical statistical flaw: the i.i.d. assumption. They treat every single pixel as an independent sample. As highlighted in the red box, this directly violates Tobler's First Law of Geography. Natural landscapes are continuous and spatially autocorrelated. Because traditional models create a dichotomy between the physical feature space and geographic space, they inevitably produce spatial anomalies, which leads to the problem introduced on the next slide.
+
+% ================= PAGE 4 =================
+\begin{frame}{Problem Statement: The 'Salt-and-Pepper' Effect}
+    \textbf{The Phenomenon:} Spatially isolated pixels or fragmented clusters whose labels differ significantly from their immediate neighbors \cite{besag1986statistical}.
+    
+    \vspace{0.1cm}
+    \textbf{Root Causes:} Intra-class heterogeneity (e.g., shadows, moisture variations) and sensor noise.
+    
+    \vspace{0.3cm}
+        \begin{block}{Consequences in GIS}
+            \begin{itemize}
+                \item Degraded LULC decision-making.
+                \item Inaccurate spatial area estimation.
+                \item Hindered landscape ecology metrics.
+            \end{itemize}
+        \end{block}
+        
+        \begin{block}{Limitations of Heuristic Filters}
+            \begin{itemize}
+                \item \textbf{Majority Filter:} Purely geometric; irreparably \textit{destroys thin linear features} (e.g., roads, rivers) \cite{kim1996adaptive}.
+                \item \textbf{MRF:} Tends to oversmooth genuine geographic boundaries.
+                \item \textbf{OBIA:} Relies heavily on subjective parameters.
+            \end{itemize}
+        \end{block}
+\end{frame}
+
+% ================= PAGE 5 =================
+\begin{frame}{Research Objectives \& Pipeline}
+    \begin{alertblock}{The Core Question}
+        Is an assigned isolated class label \textbf{statistically consistent} with the underlying spatial distribution of the continuous physical attribute ($Z$)?
+    \end{alertblock}
+    
+    \vspace{0.3cm}
+    \textbf{Specific Pipeline Objectives:}
+    \begin{enumerate} % 留出合适的间距，更易阅读
+        \item \textbf{Isolation Detection:} Define robust mathematical metrics to extract spatial candidates.
+        \item \textbf{Geostatistical Modeling:} Predict expected physical values using Ordinary Kriging.
+        \item \textbf{Hypothesis Testing:} Formulate a rigorous residual-based testing framework.
+        \item \textbf{Likelihood Reassignment:} Correct physically inconsistent pixels via MLE.
+    \end{enumerate}
+\end{frame}
+
+% ==========================================
+% 第二部分：EDA 与 预处理
+% ==========================================
+\section{Exploratory Data Analysis (EDA)}
+
+% ================= PAGE 6 =================
+\begin{frame}{Data Overview: Spatial Distribution}
+
+    \begin{figure}
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{figures/original_Z_visualization.pdf} % 请确认本地编译时相对路径正确
+            \caption{\scriptsize Continuous NDVI Distribution ($Z$)}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{figures/original_label_visualization.pdf}
+            \caption{\scriptsize Fragmented Categorical Map ($L$)}
+        \end{subfigure}
+    \end{figure}
+    \vspace{0.2cm}
+    \begin{itemize}
+        \item The categorical map (b) exhibits high-frequency noise.
+    \end{itemize}
+\end{frame}
+
+
+% ================= PAGE 7 =================
+% \begin{frame}{Statistical Analysis of Attribute Overlap}
+%     \begin{columns}[T]
+%         \column{0.4\textwidth}
+%         \centering
+%         \includegraphics[width=0.9\linewidth]{figures/Academic_KDE_Corrected.png}
+%         \captionof{figure}{\scriptsize Kernel Density Estimation (KDE) of the physical field $Z(\mathbf{X})$.}
+
+%         \column{0.5\textwidth}
+%         \textbf{Observations on Class Overlap:}
+%         \begin{itemize}
+%             \item The KDE reveals a single-modal distribution with \textbf{class overlap}.
+%             \item \alert{The Non-Spatial Trap:} Pixels with virtually identical physical values ($Z$) are forcefully assigned to different discrete classes by the EM classifier.
+%         \end{itemize}
+
+%         \begin{block}{Mechanism of Label Oscillation}
+%             Marginal physical fluctuations ($\Delta Z \approx 0.01$) due to natural variance or sensor noise trigger erratic categorical label oscillations (e.g., Class 3 $\to$ 4 $\to$ 3).
+%         \end{block}
+%     \end{columns}
+% \end{frame}
+
+% ================= PAGE 8 =================
+\begin{frame}{Verification of Prerequisite: Spatial Autocorrelation}
+    \begin{block}{Fundamental Assumption}
+        Ordinary Kriging requires the attribute field $Z(\mathbf{X})$ to exhibit spatial autocorrelation, rather than complete spatial randomness \cite{cressie2015statistics}.
+    \end{block}
+    
+    \vspace{0.3cm}
+    \textbf{Quantitative Assessment (Global Moran’s I):}
+    \begin{block}{titleQuantitative Assessment (Global Moran’s I)}
+        \begin{equation}
+        I = \frac{N}{W} \frac{\sum_{i} \sum_{j} w_{ij}(Z_i - \bar{Z})(Z_j - \bar{Z})}{\sum_{i} (Z_i - \bar{Z})^2}
+    \end{equation}
+    \end{block}
+
+        \begin{itemize}
+            \item \textbf{Result:} A highly significant positive spatial autocorrelation ($I = 0.8002$, $p < 0.001$).
+            \item \textbf{Implication:} This provides the theoretical mandate to rigorously model the physical field $Z(\mathbf{X})$ as a \textbf{Spatial Random Field (SRF)}.
+        \end{itemize}
+
+\end{frame}
+
+% ================= PAGE 9 =================
+\begin{frame}{Data Normalization}
+    \begin{columns}[T]
+        \column{0.5\textwidth} % 稍微加宽左侧以容纳公式
+        \textbf{Normality Violation:}
+        Original data is strictly non-Gaussian (skewed). This violates the normality assumption in later hypothesis testing, which can lead to biased predictions and invalid hypothesis testing \cite{wackernagel2003multivariate}.
+
+        \textbf{Normal Score Transformation (NST)}
+        \begin{equation}
+            Y(\mathbf{X}_i) = \Phi^{-1}(F(Z(\mathbf{X}_i)))
+        \end{equation}
+        {\color{gray}\scriptsize \textit{* $\Phi^{-1}$: Inverse standard normal CDF; $F$: Cumulative Distribution Function of $Z$.}}
+
+        \textbf{Transformation Results:}
+        \begin{itemize}
+            \item Regularized spatial skewness to $\approx 0$.
+            \item The empirical quantiles align with the Gaussian diagonal (see Q-Q plot).
+        \end{itemize}
+
+        \column{0.48\textwidth}
+        \centering
+        % 限制高度防止两张图溢出页面底部
+        \includegraphics[width=0.95\linewidth, height=2.8cm, keepaspectratio]{figures/Original His and QQ.png} \\
+        \vspace{0.15cm} % 给两张图之间加一点点空隙
+        \includegraphics[width=0.95\linewidth, height=2.8cm, keepaspectratio]{figures/Trans_Result_NST.png}
+        \captionof{figure}{\scriptsize Normality Evaluation: Raw $Z$ (Top) vs. NST Transformed $Y$ (Bottom).}
+    \end{columns}
+\end{frame}
+
+% ==========================================
+% 第三部分：方法论细节
+% ==========================================
+% 同样去除了硬编码的数字
+\section{Methodology (Step-by-Step)}
+
+% ================= PAGE 10 =================
+\begin{frame}{Step 1: Isolation Detection (Candidate Extraction)}
+    \textbf{Objective:} Identify spatially isolated pixels that are likely to be classification errors (artifacts) rather than genuine geographic features (anomalies).
+
+    \textbf{Mathematical Metrics:}
+    \begin{itemize}
+        \item \textbf{Neighbor Disagreement Score (NDS):} Quantifies spatial contradiction.
+        \begin{equation}
+            NDS(\mathbf{X}_i) = \frac{1}{|\mathcal{N}_i|} \sum_{j \in \mathcal{N}_i} \mathbb{I}\Big(L(\mathbf{X}_j) \neq L(\mathbf{X}_i)\Big)
+        \end{equation}
+        \textit{* $\mathbb{I}(\cdot)$ is the indicator function; $\mathcal{N}_i$ defines the Moore neighborhood.}
+
+        \item \textbf{Connected Components Analysis (CCA):} Evaluates topological connectivity to flag clusters below the designated Minimum Unit.
+    \end{itemize}
+
+    \begin{block}{Algorithmic Logic}
+    The pixels within the union set $\mathcal{S}_{\text{cand}} = \mathcal{S}_{\text{NDS}} \cup \mathcal{S}_{\text{CCA}}$ are considered isolated and serve as prediction targets in the subsequent Kriging stage.
+    \end{block}
+\end{frame}
+
+% ================= PAGE 11 =================
+\begin{frame}{Step 2: Geostatistical Validation (Ordinary Kriging)}
+    \begin{block}{Kriging System}
+        \begin{align}
+            \textbf{Estimator: } \hat{Z}(\mathbf{X}_0) &= \sum_{i=1}^{n} \lambda_i Z(\mathbf{X}_i) \\
+            \textbf{Variance: } \sigma^2_K(\mathbf{X}_0) &= 2 \sum_{i=1}^{n} \lambda_i \gamma(\mathbf{X}_i, \mathbf{X}_0) - \sum_{i=1}^{n} \sum_{j=1}^{n} \lambda_i \lambda_j \gamma(\mathbf{X}_i, \mathbf{X}_j)
+        \end{align}
+        $\lambda_i$ are the Kriging weights determined by solving the Kriging system of equations, $\gamma$ is the semivariogram to model spatial dependence.
+    \end{block}
+    
+    \vspace{0.2cm}
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \textbf{Why Ordinary Kriging?}
+        \begin{itemize}
+            \item Best Linear Unbiased Predictor.
+            \item Provides \alert{physically grounded uncertainty} $\sigma^2_K$ derived directly from the spatial covariance structure (semivariogram $\gamma$).
+        \end{itemize}
+        
+        \column{0.5\textwidth}
+        \textbf{Computational Optimization:}
+        Solving the system of Kriging equations need compute the inverse of the covariance matrix, which is \alert{$\mathcal{O}(N^3)$} , therefore utilizes only the $N$ nearest neighbors (e.g., $N=40$).
+    \end{columns}
+\end{frame}
+
+% ================= PAGE 12 =================
+\begin{frame}{Step 3: Hypothesis Testing Framework}
+    \begin{itemize}
+        \item \textbf{$H_0$:} The physical attribute $Z_{\text{obs}}(\mathbf{X}_0)$ is a valid realization generated by the spatial
+stochastic process of the surrounding class $\mathcal{C}_{\text{surr}}$.
+        \item \textbf{$H_A$:} The physical attribute $Z_{\text{obs}}(\mathbf{X}_0)$ is drawn from a distinctly different spatial process, making it physically incongruent with its surroundings.
+    \end{itemize}
+    
+    \vspace{0.2cm}
+    \textbf{Test Statistic $\eta(\mathbf{X}_0)$:}
+    \begin{equation}
+        \eta(\mathbf{X}_0) = \frac{Z_{\text{obs}}(\mathbf{X}_0) - \hat{Z}_{\text{surr}}(\mathbf{X}_0)}{\sigma_{\text{surr}}(\mathbf{X}_0)} \sim \mathcal{N}(0,1)
+    \end{equation}
+    {\centering \color{gray}\scriptsize \textit{* Asymptotic normality is mathematically guaranteed by the prior NST step.}\\ \par}
+
+To avoid the multiple testing problem across all candidates, we apply the Benjamini-Hochberg procedure to control the False Discovery Rate (FDR) at a pre-specified level $q$ (e.g., $q=0.05$).
+
+    \begin{block}{Decision Rule}
+        \begin{enumerate}
+            \item \textbf{Reject $H_0$:} Large physical discrepancy $\to$ \textbf{Preserve original label} (Real feature).
+            \item \textbf{Fail to reject $H_0$:} Small discrepancy $\to$ \textbf{Proceed to Reassignment} (Noise).
+        \end{enumerate}
+    \end{block}
+\end{frame}
+
+% ================= PAGE 13 =================
+\begin{frame}{Step 4: Likelihood-Based Class Reassignment}
+    \textbf{Maximum Likelihood Estimation (MLE):}
+    \begin{equation}
+        \mathcal{L}(C_k) = \frac{1}{\sigma_{C_k}(\mathbf{X}_0)} \exp \left( - \frac{(Z_{\text{obs}}(\mathbf{X}_0) - \hat{Z}_{C_k}(\mathbf{X}_0))^2}{2\sigma^2_{C_k}(\mathbf{X}_0)} \right)
+    \end{equation}
+    
+    \vspace{0.2cm}
+    \begin{itemize}
+        \item \textbf{Structural Regularization:} The leading term $\sigma^{-1}_{C_k}$ mathematically penalizes candidate classes that exhibit high spatial uncertainty or sparse local support.
+    \end{itemize}
+    
+    \vspace{0.3cm}
+    \begin{block}{Data-Driven Reassignment}
+        The corrected final label $L^*$ is chosen to maximize the likelihood function across all candidate classes $\mathcal{C}$ (i.e., all 5 classes):
+        \begin{equation*}
+            L^*(\mathbf{X}_0) = \underset{C_k \in \mathcal{C}}{\arg\max} \,\, \mathcal{L}(C_k)
+        \end{equation*}
+    \end{block}
+\end{frame}
+
+% ==========================================
+% 第四部分：实验结果分析
+% ==========================================
+\section{Experimental Results (Detailed)}
+
+% ================= PAGE 14 =================
+\begin{frame}{Result 1: Extraction of Candidate Outliers}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.35\linewidth}
+        \includegraphics[width=\linewidth, keepaspectratio]{figures/isolatations_NDS_visualization_map.pdf}
+        \caption{Continuous NDS Distribution}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.35\linewidth}
+        \includegraphics[width=\linewidth, keepaspectratio]{figures/transed_data_isolation_3_isolated.png}
+        \caption{Extracted Spatial Candidates}
+    \end{subfigure}
+\end{figure}
+        \textbf{Observations from Step 1:}
+        \begin{itemize}
+            \item \textbf{NDS Map (a):} High spatial contradictions are primarily clustered along class boundaries.
+            \item \textbf{Candidates (b):} Effectively isolates the "salt-and-pepper" noise patches. \textbf{6,622 pixels} flagged as candidates ($\approx 18.4\%$ of total domain).
+        \end{itemize}
+
+\end{frame}
+
+% ================= PAGE 15 =================
+\begin{frame}{Result 2: Semivariogram Modeling}
+    Based on the weighted Root Mean Square Error (wRMSE), the Exponential model demonstrated the most optimal fit.
+\begin{columns}[c]
+    \column{0.6\textwidth}
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth, keepaspectratio]{figures/optimal_variogram_plot.png}
+    \caption{\scriptsize Empirical Semivariogram (black dots) and Fitted Models: Exponential (red).}
+\end{figure}
+
+\column{0.35\textwidth}
+\textbf{Fitted Parameters:}
+        \begin{itemize}
+            \item \textbf{Nugget ($c_0$):} 0.275, reflects inherent sensor/environmental noise.
+            \item \textbf{Sill ($c$):} 0.978, indicates the total variance of the spatial process.
+            \item \textbf{Range ($a$):} 110.0 meters, defines the spatial correlation distance.
+        \end{itemize}
+
+\end{columns}
+
+\end{frame}
+
+% ================= PAGE 16 =================
+\begin{frame}{Result 3: Expected Realities and Uncertainty}
+\begin{figure}
+    \begin{subfigure}[b]{0.35\linewidth}
+        \centering
+        \includegraphics[width=\linewidth, keepaspectratio]{figures/kriged_Zback_visualization_map.pdf}
+        \caption{Kriging Prediction Field ($\hat{Z}$)}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.35\linewidth}
+        \centering
+        \includegraphics[width=\linewidth, keepaspectratio]{figures/kriged_variance_visualization_map.pdf}
+        \caption{Kriging Variance Field ($\sigma^2_K$)}
+    \end{subfigure}
+\end{figure}
+        \begin{itemize}
+            \item \textbf{Prediction (a):} Successfully maps the underlying smooth continuous field behind the categorical noise.
+            \item \textbf{Variance (b):} Uncertainty is spatially quantified ($\sigma^2_K \in [0.36, 0.65]$). High variance zones correspond to areas with sparse data support, guiding the subsequent hypothesis testing.
+        \end{itemize}
+        Kriging provides a physically reliable benchmark for testing.
+
+\end{frame}
+
+% ================= PAGE 17 =================
+\begin{frame}{Result 4: Statistical Decisions (The Filter)}
+    \textbf{False Discovery Rate (FDR) Control at $q = 0.05$:}
+    \vspace{0.3cm}
+    
+    \begin{center}
+    % 使用较大的字号和宽敞的表格间距
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Statistical Category} & \textbf{Pixel Count} & \textbf{Percentage} \\
+        \midrule
+        Total Isolated Candidates ($S_{\text{cand}}$) & 6,622 & 100\% \\
+        \textbf{Rejected $H_0$ (Genuine Anomalies)} & \textbf{6} & \textbf{0.1\%} \\
+        \color{gray}Fail to reject $H_0$ (Artifacts/Noise) & \color{gray}6,616 & \color{gray}99.9\% \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    
+    \vspace{0.3cm}
+    \textbf{Interpretation \& Impact:}
+    \begin{itemize}
+        \item The visual "salt-and-pepper" noise is overwhelmingly confirmed as \alert{non-physical artifacts} (99.9\%).
+        \item Crucially, the conservative FDR test successfully identifies and \textbf{preserves 6 legitimate micro-structures} that would have been destroyed by standard filters.
+    \end{itemize}
+\end{frame}
+
+% ================= PAGE 18 =================
+\begin{frame}{Result 5: Label Correction Analysis (MLE)}
+    \begin{columns}[c]
+        \column{0.48\textwidth}
+        \textbf{MLE Reassignment Summary:}
+        \begin{itemize}
+            \item \textbf{Reassigned (5,180):} Transitioned to a new label that maximizes the physical likelihood $\mathcal{L}(C_k)$.
+            \item \textbf{Retained (1,436):} Geometrically isolated, yet \textbf{statistically most probable} in their original class.
+        \end{itemize}
+        
+        \vspace{0.3cm}
+        \begin{alertblock}{The Defeat of Heuristic Filters}
+            This proves that a pure "Majority Voting" algorithm would have mistakenly flipped the labels of \textbf{21.7\%} (1,436/6,616) of the isolated pixels.
+        \end{alertblock}
+
+        \column{0.48\textwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth, keepaspectratio]{figures/thesis_single_c_diff.png} 
+        \captionof{figure}{\scriptsize Final Refined Categorical Map.}
+    \end{columns}
+\end{frame}
+
+% ================= PAGE 19 =================
+\begin{frame}{Comprehensive Map Comparison}
+    \centering
+    % 拼图最好横向排开
+    \includegraphics[width=0.95\linewidth, keepaspectratio]{figures/thesis_combined_comparison.png}
+    
+    \vspace{0.2cm}
+    \begin{columns}[T]
+        \column{0.33\textwidth}
+        \centering \textbf{(a) Original Fragmented}
+        \column{0.33\textwidth}
+        \centering \textbf{(b) Refined Map}
+        \column{0.33\textwidth}
+        \centering \textbf{(c) Difference Map}
+    \end{columns}
+    
+    \vspace{0.4cm}
+    \begin{itemize}
+        \item \textbf{Visual Assessment:} The refinement process (b) successfully eradicates spurious noise while \alert{strictly preserving crisp linear boundaries and genuine geographic structures}.
+    \end{itemize}
+\end{frame}
+
+% ================= PAGE 20 =================
+% \begin{frame}{Analysis of the Difference Map}
+%     \begin{columns}[c]
+%         \column{0.5\textwidth}
+%         \centering
+%         \includegraphics[width=0.9\linewidth, keepaspectratio]{figures/thesis_single_c_diff.png}
+%         \captionof{figure}{\scriptsize Spatial locations of the 5,180 reassigned pixels.}
+
+%         \column{0.5\textwidth}
+%         \textbf{Observation Highlights:}
+%         \begin{itemize}
+%             \item Corrections are logically concentrated in \textbf{transition zones} (ecotones) rather than homogeneous interiors.
+%             \item High-frequency clusters are thoroughly eradicated.
+%             \item The underlying physical continuity (NDVI) is successfully restored to the categorical space.
+%             \item \alert{Zero "Artificial Blockiness"} (a notorious artifact typically induced by rigid moving-window Majority Filters).
+%         \end{itemize}
+%     \end{columns}
+% \end{frame}
+
+% ==========================================
+% 第五部分：总结与展望
+% ==========================================
+\section{Conclusion}
+
+\begin{frame}{Discussion and Methodological Limitations}
+    \small
+    
+    % --- 讨论部分：基于实验数据的严谨推论 ---
+    \textbf{1. Theoretical and Empirical Discussion}
+    \begin{itemize}
+        \item \textbf{Validation vs. Smoothing:} The rejection of $H_0$ for only 0.1\% of candidates (Step 3) confirms that 99.9\% of isolations were physically consistent with their surroundings. 
+        \item \textbf{Retention Rate:} Statistical evidence (MLE) supported the retention of \alert{21.7\%} (1,436 pixels) of geometrically isolated labels. This confirms that topological isolation is not a sufficient condition for classification error.
+        \item \textbf{Uncertainty Integration:} Using $\sigma_{C_k}^{-1}(\mathbf{X}_0)$ as a precision weight in the MLE framework (Eq. 3.41) objectively penalizes candidate classes with high internal variance or sparse local support.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \hrule
+    \vspace{0.2cm}
+
+    % --- 局限性部分：基于模型假设的约束 ---
+    \textbf{2. Methodological Limitations}
+    \begin{itemize}
+        \item \textbf{Assumption of Local Stationarity:} The framework relies on a locally constant mean $\mathbb{E}[Z(\mathbf{X})] = \mu$. In landscapes with significant macroscopic gradients (e.g., elevation trends), Kriging residuals will exhibit bias, potentially inflating Type I/II errors.
+        \item \textbf{Computational Complexity:} Unlike $O(n)$ local window filters, the geostatistical approach requires matrix inversion for each candidate class. The \alert{$O(m^3)$} complexity (where $m$ is the number of neighbors) limits scalability for massive regional datasets.
+    \end{itemize}
+\end{frame}
+
+% --- 第 21 页：结论与未来展望 (Conclusion & Future Work) ---
+\begin{frame}{Conclusion \& Future Directions}
+    \textbf{Research Summary:}
+    \begin{itemize}
+        \item \textbf{Paradigm Shift:} Transitioned post-classification from "geometric cleanup" to \textbf{formal spatial inference}.
+        \item \textbf{FDR Control and MLE:} Successfully balanced aggressive noise eradication with the preservation of micro-scale geographic realities.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Future Research Directions:}
+    \begin{itemize}
+        \item \textbf{Non-Stationary Modeling:} Replace OK with \textbf{Universal Kriging} or \textbf{Regression Kriging} to incorporate auxiliary variables (e.g., DEM, Soil Moisture).
+        \item \textbf{Spatiotemporal Refinement:} Expanding $\gamma(\mathbf{h})$ into \textbf{3D semivariograms} $\gamma(\mathbf{h}, t)$ to validate pixels against their historical physical trajectories.
+        \item \textbf{Multivariate Co-Kriging:} Utilizing cross-correlation between multiple spectral indices to enhance refinement stability.
+    \end{itemize}
+\end{frame}
+
+% --- 参考文献页 ---
+% 使用 allowframebreaks 自动处理多页参考文献
+\begin{frame}[allowframebreaks]{References}
+    \printbibliography[heading=none]
+\end{frame}
+
+% ================= PAGE 23 =================
+\begin{frame}[plain] % plain 隐藏掉页脚和导航栏，让致谢页更纯粹
+    \centering
+    \vspace{1.5cm}
+    {\Huge \textbf{Thank You!}}
+    
+    \vspace{0.8cm}
+    {\large \textbf{Questions \& Discussion}}
+    
+    \vspace{1.2cm}
+    {\normalsize Weiqian Xu} \\
+    {\small Saint Petersburg State University} \\
+    {\small \textit{Applied Mathematics}}
+\end{frame}
+
+
+\end{document}

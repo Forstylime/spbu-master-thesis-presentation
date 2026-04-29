@@ -1,0 +1,160 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{besag1986statistical}{article}{}
+      \name{author}{1}{}{%
+        {{hash=edb737d7d1e747fe77a6de5be6c5e9e4}{%
+           family={Besag},
+           familyi={B\bibinitperiod},
+           given={Julian},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Wiley Online Library}%
+      }
+      \strng{namehash}{edb737d7d1e747fe77a6de5be6c5e9e4}
+      \strng{fullhash}{edb737d7d1e747fe77a6de5be6c5e9e4}
+      \strng{bibnamehash}{edb737d7d1e747fe77a6de5be6c5e9e4}
+      \strng{authorbibnamehash}{edb737d7d1e747fe77a6de5be6c5e9e4}
+      \strng{authornamehash}{edb737d7d1e747fe77a6de5be6c5e9e4}
+      \strng{authorfullhash}{edb737d7d1e747fe77a6de5be6c5e9e4}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of the Royal Statistical Society: Series B (Methodological)}
+      \field{number}{3}
+      \field{title}{On the statistical analysis of dirty pictures}
+      \field{volume}{48}
+      \field{year}{1986}
+      \field{pages}{259\bibrangedash 279}
+      \range{pages}{21}
+    \endentry
+    \entry{cressie2015statistics}{book}{}
+      \name{author}{1}{}{%
+        {{hash=1d684a7b784094856b0f4832104839c4}{%
+           family={Cressie},
+           familyi={C\bibinitperiod},
+           given={Noel},
+           giveni={N\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {John Wiley \& Sons}%
+      }
+      \strng{namehash}{1d684a7b784094856b0f4832104839c4}
+      \strng{fullhash}{1d684a7b784094856b0f4832104839c4}
+      \strng{bibnamehash}{1d684a7b784094856b0f4832104839c4}
+      \strng{authorbibnamehash}{1d684a7b784094856b0f4832104839c4}
+      \strng{authornamehash}{1d684a7b784094856b0f4832104839c4}
+      \strng{authorfullhash}{1d684a7b784094856b0f4832104839c4}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Statistics for spatial data}
+      \field{year}{2015}
+    \endentry
+    \entry{kim1996adaptive}{article}{}
+      \name{author}{1}{}{%
+        {{hash=f2bfab04ce5f938289d50d4e34d0595d}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Kwang\bibnamedelima E},
+           giveni={K\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Taylor \& Francis}%
+      }
+      \strng{namehash}{f2bfab04ce5f938289d50d4e34d0595d}
+      \strng{fullhash}{f2bfab04ce5f938289d50d4e34d0595d}
+      \strng{bibnamehash}{f2bfab04ce5f938289d50d4e34d0595d}
+      \strng{authorbibnamehash}{f2bfab04ce5f938289d50d4e34d0595d}
+      \strng{authornamehash}{f2bfab04ce5f938289d50d4e34d0595d}
+      \strng{authorfullhash}{f2bfab04ce5f938289d50d4e34d0595d}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{International Journal of Remote Sensing}
+      \field{number}{5}
+      \field{title}{Adaptive majority filtering for contextual classification of remote sensing data}
+      \field{volume}{17}
+      \field{year}{1996}
+      \field{pages}{1083\bibrangedash 1087}
+      \range{pages}{5}
+    \endentry
+    \entry{tobler1970computer}{article}{}
+      \name{author}{1}{}{%
+        {{hash=59ec782f697f0582e93512f25a7ad64c}{%
+           family={Tobler},
+           familyi={T\bibinitperiod},
+           given={Waldo\bibnamedelima R},
+           giveni={W\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Taylor \& Francis}%
+      }
+      \strng{namehash}{59ec782f697f0582e93512f25a7ad64c}
+      \strng{fullhash}{59ec782f697f0582e93512f25a7ad64c}
+      \strng{bibnamehash}{59ec782f697f0582e93512f25a7ad64c}
+      \strng{authorbibnamehash}{59ec782f697f0582e93512f25a7ad64c}
+      \strng{authornamehash}{59ec782f697f0582e93512f25a7ad64c}
+      \strng{authorfullhash}{59ec782f697f0582e93512f25a7ad64c}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Economic geography}
+      \field{number}{2}
+      \field{title}{A computer movie simulating urban growth in the Detroit region}
+      \field{volume}{46}
+      \field{year}{1970}
+      \field{pages}{234\bibrangedash 240}
+      \range{pages}{7}
+    \endentry
+    \entry{wackernagel2003multivariate}{book}{}
+      \name{author}{1}{}{%
+        {{hash=aca0da94927ed1f0dcf608d0e56e1663}{%
+           family={Wackernagel},
+           familyi={W\bibinitperiod},
+           given={Hans},
+           giveni={H\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer Science \& Business Media}%
+      }
+      \strng{namehash}{aca0da94927ed1f0dcf608d0e56e1663}
+      \strng{fullhash}{aca0da94927ed1f0dcf608d0e56e1663}
+      \strng{bibnamehash}{aca0da94927ed1f0dcf608d0e56e1663}
+      \strng{authorbibnamehash}{aca0da94927ed1f0dcf608d0e56e1663}
+      \strng{authornamehash}{aca0da94927ed1f0dcf608d0e56e1663}
+      \strng{authorfullhash}{aca0da94927ed1f0dcf608d0e56e1663}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Multivariate geostatistics: an introduction with applications}
+      \field{year}{2003}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

@@ -48,18 +48,19 @@
 \section{Introduction \& Background}
 
 \begin{frame}{Background: Pixel-based Classification in GIS}
-    \begin{alertblock}{Tobler's 1st Law}
+    
+\textbf{Context: Remote Sensing and Expectations Maximization (EM) Clustering}
+        \begin{itemize}
+            \item High-resolution data demands automated, pixel-wise Land Use/Land Cover (LULC) classification or clustering.
+            \item The EM clustering algorithm was used in the data used in this study, and five clustering results were given.
+        \end{itemize}
+
+        \begin{alertblock}{Tobler's 1st Law}
             "Everything is related to everything else, but near things are more related than distant things." \cite{tobler1970computer}
         \end{alertblock}
-   
-        % 现状与痛点
-        \textbf{Context: Remote Sensing (RS)}
-        \begin{itemize}
-            \item High-resolution data demands automated, pixel-wise Land Use/Land Cover (LULC) classification.
-        \end{itemize}
         
         \vspace{0.4cm}
-        \textbf{The Flaw in EM:} EM Clustering treat every single pixel as an independent sample. this directly violates Tobler's First Law of Geography. Natural landscapes are continuous and spatially autocorrelated.
+        \textbf{The Flaw in Expectation-Maximization Algorithm:} EM Clustering treat every single pixel as an independent sample. this directly violates Tobler's First Law of Geography. Natural landscapes are continuous and spatially autocorrelated.
 
 \end{frame}
 
@@ -67,10 +68,8 @@
 
 % ================= PAGE 4 =================
 \begin{frame}{Problem Statement: The 'Salt-and-Pepper' Effect}
-    \textbf{The Phenomenon:} Spatially isolated pixels or fragmented clusters whose labels differ significantly from their immediate neighbors \cite{besag1986statistical}.
+    \textbf{The Phenomenon:} Spatially isolated pixels or fragmented clusters of pixels whose labels, as given by EM, are significantly different from those of their neighboring pixels. \cite{besag1986statistical}.
     
-    \vspace{0.1cm}
-    \textbf{Root Causes:} Intra-class heterogeneity (e.g., shadows, moisture variations) and sensor noise.
     
     \vspace{0.3cm}
         \begin{block}{Consequences in GIS}
@@ -83,21 +82,21 @@
         
         \begin{block}{Limitations of Heuristic Filters}
             \begin{itemize}
-                \item \textbf{Majority Filter:} Purely geometric; irreparably \textit{destroys thin linear features} (e.g., roads, rivers) \cite{kim1996adaptive}.
-                \item \textbf{MRF:} Tends to oversmooth genuine geographic boundaries.
-                \item \textbf{OBIA:} Relies heavily on subjective parameters.
+                \item \textbf{Majority Filter:} Purely geometric, destroys thin linear features (e.g., roads, rivers) \cite{kim1996adaptive}.
+                \item \textbf{Markov Random Fields (MRF):} Tends to oversmooth genuine geographic boundaries.
+                \item \textbf{ Object-Based Image Analysis (OBIA):} Relies heavily on subjective parameters.
             \end{itemize}
         \end{block}
 \end{frame}
 
 % ================= PAGE 5 =================
 \begin{frame}{Research Objectives \& Pipeline}
-    \begin{alertblock}{The Core Question}
-        Is an assigned isolated class label \textbf{statistically consistent} with the underlying spatial distribution of the continuous physical attribute ($Z$)?
+    \begin{alertblock}{The Core Objective}
+        Make pixels with isolated class label \textbf{statistically consistent} with the underlying spatial distribution of the continuous physical attribute ($Z$).
     \end{alertblock}
     
     \vspace{0.3cm}
-    \textbf{Specific Pipeline Objectives:}
+    \textbf{Specific Pipeline:}
     \begin{enumerate} % 留出合适的间距，更易阅读
         \item \textbf{Isolation Detection:} Define robust mathematical metrics to extract spatial candidates.
         \item \textbf{Geostatistical Modeling:} Predict expected physical values using Ordinary Kriging.
@@ -115,19 +114,20 @@
 \begin{frame}{Data Overview: Spatial Distribution}
 
     \begin{figure}
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.4\textwidth}
             \centering
-            \includegraphics[width=\linewidth]{figures/original_Z_visualization.pdf} % 请确认本地编译时相对路径正确
-            \caption{\scriptsize Continuous NDVI Distribution ($Z$)}
+            \includegraphics[width=\linewidth]{figures/original_Z_visualization.pdf}
+            \caption{\scriptsize Productivity Distribution ($Z$)}
         \end{subfigure}
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.4\textwidth}
             \centering
             \includegraphics[width=\linewidth]{figures/original_label_visualization.pdf}
             \caption{\scriptsize Fragmented Categorical Map ($L$)}
         \end{subfigure}
     \end{figure}
-    \vspace{0.2cm}
+    Here, the continuous physical attribute $Z$ is the productivity index, and the categorical map $L$ is the result of EM clustering.
     \begin{itemize}
+        \item The continuous physical field (a) shows attribute values range from 0.39 to 0.92, and exhibits a spatial gradient with clear spatial autocorrelation.
         \item The categorical map (b) exhibits high-frequency noise.
     \end{itemize}
 \end{frame}
@@ -161,8 +161,7 @@
     \end{block}
     
     \vspace{0.3cm}
-    \textbf{Quantitative Assessment (Global Moran’s I):}
-    \begin{block}{titleQuantitative Assessment (Global Moran’s I)}
+    \begin{block}{Quantitative Assessment (Global Moran's I)}
         \begin{equation}
         I = \frac{N}{W} \frac{\sum_{i} \sum_{j} w_{ij}(Z_i - \bar{Z})(Z_j - \bar{Z})}{\sum_{i} (Z_i - \bar{Z})^2}
     \end{equation}
@@ -170,7 +169,7 @@
 
         \begin{itemize}
             \item \textbf{Result:} A highly significant positive spatial autocorrelation ($I = 0.8002$, $p < 0.001$).
-            \item \textbf{Implication:} This provides the theoretical mandate to rigorously model the physical field $Z(\mathbf{X})$ as a \textbf{Spatial Random Field (SRF)}.
+            \item \textbf{Implication:} This provides the theoretical support to model the physical field $Z(\mathbf{X})$ as a \textbf{Spatial Random Field (SRF)} and apply Kriging methods.
         \end{itemize}
 
 \end{frame}
@@ -180,7 +179,7 @@
     \begin{columns}[T]
         \column{0.5\textwidth} % 稍微加宽左侧以容纳公式
         \textbf{Normality Violation:}
-        Original data is strictly non-Gaussian (skewed). This violates the normality assumption in later hypothesis testing, which can lead to biased predictions and invalid hypothesis testing \cite{wackernagel2003multivariate}.
+        Original data is apparently non-Normal distributed. This violates the normality assumption in later hypothesis testing, which will lead to biased predictions and invalid hypothesis testing \cite{wackernagel2003multivariate}.
 
         \textbf{Normal Score Transformation (NST)}
         \begin{equation}
@@ -195,12 +194,19 @@
         \end{itemize}
 
         \column{0.48\textwidth}
-        \centering
-        % 限制高度防止两张图溢出页面底部
-        \includegraphics[width=0.95\linewidth, height=2.8cm, keepaspectratio]{figures/Original His and QQ.png} \\
-        \vspace{0.15cm} % 给两张图之间加一点点空隙
-        \includegraphics[width=0.95\linewidth, height=2.8cm, keepaspectratio]{figures/Trans_Result_NST.png}
-        \captionof{figure}{\scriptsize Normality Evaluation: Raw $Z$ (Top) vs. NST Transformed $Y$ (Bottom).}
+        \begin{figure}
+            \begin{subfigure}[b]{0.9\linewidth}
+                \centering
+                \includegraphics[width=\linewidth, keepaspectratio]{figures/Original His and QQ.png}
+                \caption{\scriptsize Original $Z$ Histogram \& Q-Q Plot}
+            \end{subfigure}
+            \\
+            \begin{subfigure}[b]{0.9\linewidth}
+                \centering
+                \includegraphics[width=\linewidth, keepaspectratio]{figures/Trans_Result_NST.png}
+                \caption{\scriptsize NST Transformed $Y$ Histogram \& Q-Q Plot}
+            \end{subfigure}
+        \end{figure}
     \end{columns}
 \end{frame}
 
@@ -212,10 +218,10 @@
 
 % ================= PAGE 10 =================
 \begin{frame}{Step 1: Isolation Detection (Candidate Extraction)}
-    \textbf{Objective:} Identify spatially isolated pixels that are likely to be classification errors (artifacts) rather than genuine geographic features (anomalies).
+    \textbf{Objective:} Identify spatially isolated pixels, which are likely misclassified rather than being true geographical features.
 
-    \textbf{Mathematical Metrics:}
-    \begin{itemize}
+    \begin{block}{Mathematical Metrics}
+        \begin{itemize}
         \item \textbf{Neighbor Disagreement Score (NDS):} Quantifies spatial contradiction.
         \begin{equation}
             NDS(\mathbf{X}_i) = \frac{1}{|\mathcal{N}_i|} \sum_{j \in \mathcal{N}_i} \mathbb{I}\Big(L(\mathbf{X}_j) \neq L(\mathbf{X}_i)\Big)
@@ -223,35 +229,37 @@
         \textit{* $\mathbb{I}(\cdot)$ is the indicator function; $\mathcal{N}_i$ defines the Moore neighborhood.}
 
         \item \textbf{Connected Components Analysis (CCA):} Evaluates topological connectivity to flag clusters below the designated Minimum Unit.
-    \end{itemize}
-
-    \begin{block}{Algorithmic Logic}
-    The pixels within the union set $\mathcal{S}_{\text{cand}} = \mathcal{S}_{\text{NDS}} \cup \mathcal{S}_{\text{CCA}}$ are considered isolated and serve as prediction targets in the subsequent Kriging stage.
+        \end{itemize}
     \end{block}
+    
+
+    \textbf{Algorithmic Logic:}
+    Denote $\mathcal{S}$ as the set of all pixels, $\mathcal{S}_{\text{NDS}}$ as the set of pixels with $NDS > \tau$ (e.g., $\tau=0.8$), and $\mathcal{S}_{\text{CCA}}$ as the set of pixels in connected components smaller than the Minimum Unit (e.g., 4 pixels).
+    The pixels within the union set $\mathcal{S}_{\text{cand}} = \mathcal{S}_{\text{NDS}} \cup \mathcal{S}_{\text{CCA}}$ are considered isolated and serve as prediction targets in the subsequent Kriging stage.
 \end{frame}
 
 % ================= PAGE 11 =================
 \begin{frame}{Step 2: Geostatistical Validation (Ordinary Kriging)}
-    \begin{block}{Kriging System}
+    For candidate $\mathbf{X}_0 \in \mathcal{S}_{\text{cand}}$, we use Ordinary Kriging to predict the expected value $\hat{Z}(\mathbf{X}_0)$ and quantify the associated uncertainty $\sigma^2_K(\mathbf{X}_0)$.
+    \begin{block}{Kriging Methodology} 
         \begin{align}
-            \textbf{Estimator: } \hat{Z}(\mathbf{X}_0) &= \sum_{i=1}^{n} \lambda_i Z(\mathbf{X}_i) \\
+            \textbf{Estimator: } \hat{Z}(\mathbf{X}_0) &= \sum_{i=1}^{n} \lambda_i Z(\mathbf{X}_i), \quad \mathbf{X_i} \in \mathcal{S}_{\text{reference}} = \mathcal{S}_{\text{cand}}\backslash S \\
             \textbf{Variance: } \sigma^2_K(\mathbf{X}_0) &= 2 \sum_{i=1}^{n} \lambda_i \gamma(\mathbf{X}_i, \mathbf{X}_0) - \sum_{i=1}^{n} \sum_{j=1}^{n} \lambda_i \lambda_j \gamma(\mathbf{X}_i, \mathbf{X}_j)
         \end{align}
         $\lambda_i$ are the Kriging weights determined by solving the Kriging system of equations, $\gamma$ is the semivariogram to model spatial dependence.
     \end{block}
     
-    \vspace{0.2cm}
     \begin{columns}[T]
         \column{0.48\textwidth}
         \textbf{Why Ordinary Kriging?}
         \begin{itemize}
             \item Best Linear Unbiased Predictor.
-            \item Provides \alert{physically grounded uncertainty} $\sigma^2_K$ derived directly from the spatial covariance structure (semivariogram $\gamma$).
+            \item Provides \alert{physically grounded uncertainty} $\sigma^2_K$.
         \end{itemize}
         
-        \column{0.5\textwidth}
+        \column{0.48\textwidth}
         \textbf{Computational Optimization:}
-        Solving the system of Kriging equations need compute the inverse of the covariance matrix, which is \alert{$\mathcal{O}(N^3)$} , therefore utilizes only the $N$ nearest neighbors (e.g., $N=40$).
+        Solving the system of Kriging equations need compute the inverse of the covariance matrix, which is \alert{$\mathcal{O}(N^3)$} , therefore utilizes only the $N=64$ nearest neighbors.
     \end{columns}
 \end{frame}
 
@@ -282,23 +290,23 @@ To avoid the multiple testing problem across all candidates, we apply the Benjam
 
 % ================= PAGE 13 =================
 \begin{frame}{Step 4: Likelihood-Based Class Reassignment}
-    \textbf{Maximum Likelihood Estimation (MLE):}
+    \begin{block}{Kriging-Based Likelihood Function}
+        For each candidate class $C_k \in \mathcal{C}$, we compute the likelihood of observing $Z_{\text{obs}}(\mathbf{X}_0)$:
     \begin{equation}
         \mathcal{L}(C_k) = \frac{1}{\sigma_{C_k}(\mathbf{X}_0)} \exp \left( - \frac{(Z_{\text{obs}}(\mathbf{X}_0) - \hat{Z}_{C_k}(\mathbf{X}_0))^2}{2\sigma^2_{C_k}(\mathbf{X}_0)} \right)
     \end{equation}
-    
+    \textit{* $\hat{Z}_{C_k}(\mathbf{X}_0)$ and $\sigma^2_{C_k}(\mathbf{X}_0)$ are the Kriging prediction and variance computed using only the reference pixels belonging to class $C_k$, i.e., $\mathcal{S}_{\text{ref}}(C_k) = \{ \mathbf{X}_i : L(\mathbf{X}_i) = C_k \}$.}
+    \end{block}
+       
     \vspace{0.2cm}
     \begin{itemize}
         \item \textbf{Structural Regularization:} The leading term $\sigma^{-1}_{C_k}$ mathematically penalizes candidate classes that exhibit high spatial uncertainty or sparse local support.
-    \end{itemize}
-    
-    \vspace{0.3cm}
-    \begin{block}{Data-Driven Reassignment}
-        The corrected final label $L^*$ is chosen to maximize the likelihood function across all candidate classes $\mathcal{C}$ (i.e., all 5 classes):
+        \item The corrected final label $L^*$ is chosen to maximize the likelihood function across all candidate classes $\mathcal{C}$ (i.e., all 5 classes):
         \begin{equation*}
             L^*(\mathbf{X}_0) = \underset{C_k \in \mathcal{C}}{\arg\max} \,\, \mathcal{L}(C_k)
         \end{equation*}
-    \end{block}
+    \end{itemize}
+
 \end{frame}
 
 % ==========================================
@@ -369,12 +377,10 @@ To avoid the multiple testing problem across all candidates, we apply the Benjam
             \item \textbf{Prediction (a):} Successfully maps the underlying smooth continuous field behind the categorical noise.
             \item \textbf{Variance (b):} Uncertainty is spatially quantified ($\sigma^2_K \in [0.36, 0.65]$). High variance zones correspond to areas with sparse data support, guiding the subsequent hypothesis testing.
         \end{itemize}
-        Kriging provides a physically reliable benchmark for testing.
-
 \end{frame}
 
 % ================= PAGE 17 =================
-\begin{frame}{Result 4: Statistical Decisions (The Filter)}
+\begin{frame}{Result 4: Statistical Decisions}
     \textbf{False Discovery Rate (FDR) Control at $q = 0.05$:}
     \vspace{0.3cm}
     
@@ -440,7 +446,7 @@ To avoid the multiple testing problem across all candidates, we apply the Benjam
     
     \vspace{0.4cm}
     \begin{itemize}
-        \item \textbf{Visual Assessment:} The refinement process (b) successfully eradicates spurious noise while \alert{strictly preserving crisp linear boundaries and genuine geographic structures}.
+        \item \textbf{Visual Assessment:} The refinement process (b) successfully eliminated spurious noise while strictly preserving clear linear boundaries and true geographic structure.
     \end{itemize}
 \end{frame}
 

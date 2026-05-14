@@ -1,0 +1,5 @@
+# .indentconfig.yaml
+itemize:
+  indent: 2
+enumerate:
+  indent: 2

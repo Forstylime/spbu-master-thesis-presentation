@@ -2,7 +2,6 @@
 
 % -------- 主题与风格设置 --------
 \usetheme{Madrid}
-% \usecolortheme{dolphin}
 \usefonttheme{professionalfonts}
 \setbeamertemplate{navigation symbols}{} % 隐藏导航栏
 \setbeamertemplate{caption}[numbered]     % 显示图片编号
@@ -64,8 +63,6 @@ economy}
 
 \end{frame}
 
-%Currently, pixel-wise classification algorithms like EM or Random Forests are widely used. However, they share a critical statistical weakness: the i.i.d. assumption. They treat every single pixel as an independent sample. As highlighted in the red box, this directly violates Tobler's First Law of Geography. Natural landscapes are continuous and spatially autocorrelated. Because traditional models create a split between the physical feature space and geographic space, they inevitably produce spatial anomalies, which leads to the problem introduced on the next slide.
-
 % ================= PAGE 4 =================
 \begin{frame}{Problem Statement: The 'Salt-and-Pepper' Effect}
     \textbf{The Phenomenon:} This happens when individual pixels, or small, fragmented groups, stand out against their background. Their labels, as assigned by the EM algorithm, clash with the surrounding data, creating a noisy, scattered appearance that doesn't match the environment. \cite{besag1986statistical}.
@@ -126,7 +123,7 @@ economy}
         \end{subfigure}
     \end{figure}
     Here, the continuous physical attribute $Z$ represents a real-valued scalar
-corresponding to the maximum seasonal NDVI, and the categorical $L$ represents agricultural productivity levels.
+    corresponding to the maximum seasonal NDVI, and the categorical $L$ represents agricultural productivity levels.
     \begin{itemize}
         \item The continuous physical field (a) initially shows spatial autocorrelation.
         \item The categorical map (b) shows high-frequency noise.
@@ -363,50 +360,28 @@ corresponding to the maximum seasonal NDVI, and the categorical $L$ represents a
     \end{columns}
 
     \begin{columns}
-    \column{0.6\textwidth}
-    \textbf{FDR Control at $q = 0.05$:}
-    \begin{center}
-        \renewcommand{\arraystretch}{1.2}
-        \begin{tabular}{lcc}
-            \toprule
-            \textbf{Statistical Category}        & \textbf{Count}    & \textbf{percentage, \%}        \\
-            \midrule
-            Total Candidates ($S_{\text{cand}}$) & 6,622             & 100\%              \\
-            \textbf{Rejected $H_0$}              & \textbf{6}        & \textbf{0.1\%}     \\
-            \color{gray}Fail to reject $H_0$     & \color{gray}6,616 & \color{gray}99.9\% \\
-            \bottomrule
-        \end{tabular}
-    \end{center}
+        \column{0.6\textwidth}
+        \textbf{FDR Control at $q = 0.05$:}
+        \begin{center}
+            \renewcommand{\arraystretch}{1.2}
+            \begin{tabular}{lcc}
+                \toprule
+                \textbf{Statistical Category}        & \textbf{Count}    & \textbf{percentage, \%} \\
+                \midrule
+                Total Candidates ($S_{\text{cand}}$) & 6,622             & 100\%                   \\
+                \textbf{Rejected $H_0$}              & \textbf{6}        & \textbf{0.1\%}          \\
+                \color{gray}Fail to reject $H_0$     & \color{gray}6,616 & \color{gray}99.9\%      \\
+                \bottomrule
+            \end{tabular}
+        \end{center}
 
-    \column{0.38\textwidth}
-    \begin{itemize}
-        \item 99.9\% of the "salt-and-pepper" noise considered as noise pixels.
-        \item FDR test keeps \textbf{6 real micro-structures} that standard filters would have removed.
-    \end{itemize}
+        \column{0.38\textwidth}
+        \begin{itemize}
+            \item 99.9\% of the "salt-and-pepper" noise considered as noise pixels.
+            \item FDR test keeps \textbf{6 real micro-structures} that standard filters would have removed.
+        \end{itemize}
     \end{columns}
 \end{frame}
-
-% ================= PAGE 18 =================
-% \begin{frame}{Result 5: Label Correction Analysis (MLE)}
-%     \begin{columns}[c]
-%         \column{0.48\textwidth}
-%         \textbf{MLE Reassignment Summary:}
-%         \begin{itemize}
-%             \item \textbf{Reassigned (5,180):} Transitioned to a new label that maximizes the physical likelihood $\mathcal{L}(C_k, \mathbf{X}_0)$.
-%             \item \textbf{Retained (1,436):} Geometrically isolated, yet \textbf{statistically most probable} in their original class.
-%         \end{itemize}
-
-%         \vspace{0.3cm}
-%         \begin{alertblock}{Key Insight}
-%             The Kriging-based MLE method effectively balances strong noise removal with the keeping of micro-scale geographic realities, resulting in a refined map that is both cleaner and more physically consistent.
-%         \end{alertblock}
-
-%         \column{0.48\textwidth}
-%         \centering
-%         \includegraphics[width=0.9\linewidth, keepaspectratio]{figures/thesis_single_c_diff.png}
-%         \captionof{figure}{\scriptsize Final Refined Categorical Difference Map.}
-%     \end{columns}
-% \end{frame}
 
 % ================= PAGE 19 =================
 \begin{frame}{Result 5: Label Correction Analysis and Comparison}
@@ -436,29 +411,6 @@ corresponding to the maximum seasonal NDVI, and the categorical $L$ represents a
 % 第五部分：总结与展望
 % ==========================================
 \section{Conclusion}
-
-% \begin{frame}{Discussion and Methodological Limitations}
-%     \small
-
-%     % --- 讨论部分：基于实验数据的严谨推论 ---
-%     \textbf{1. Theoretical and Empirical Discussion}
-%     \begin{itemize}
-%         \item \textbf{High reliability:} We rejected the null hypothesis in only 0.1\% of cases. This shows that 99.9\% of the isolated areas are actually consistent with their surrounding environment.
-%         \item \textbf{Validating isolated labels:} Our analysis kept 21.7\% (1,436 pixels) of the geometrically isolated labels. This proves that just because a label is isolated in space doesn't automatically mean it's an error.
-%         \item \textbf{Accounting for uncertainty:} By using local variance ($\sigma_{C_k}^{-1}$) as a weight, the model naturally gives less importance to predictions that are either too scattered or lack enough nearby data, making the results more robust.
-%     \end{itemize}
-
-%     \vspace{0.2cm}
-%     \hrule
-%     \vspace{0.2cm}
-
-%     % --- 局限性部分：基于模型假设的约束 ---
-%     \textbf{2. Methodological Limitations}
-%     \begin{itemize}
-%         \item \textbf{Assumption of constant average:} We assume that the data’s average value stays roughly the same across the area. If there are clear trends—like a steady change in elevation—this assumption breaks down. This leads to biased results and increases the risk of making wrong conclusions.
-%         \item \textbf{Slow performance:} Unlike simpler methods that process data quickly, this approach requires heavy matrix math. Because the work required grows rapidly as you add more neighbors ($O(m^3)$ complexity), it becomes very slow and difficult to use on massive datasets.
-%     \end{itemize}
-% \end{frame}
 
 % --- 第 21 页：结论与未来展望 (Conclusion & Future Work) ---
 \begin{frame}{Conclusion \& Future Directions}
